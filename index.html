@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>RollGeon — Medieval Decision Wheel</title>
+
+  <meta
+    name="description"
+    content="A pixel art medieval decision wheel built with HTML, CSS, JavaScript, and localStorage."
+  />
+
+  <link rel="icon" href="assets/icons/favicon.png" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body data-theme="castle">
+  <div class="background-glow"></div>
+
+  <div class="app">
+    <!-- HEADER -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-icon">🛡️</div>
+
+        <div>
+          <h1 id="appTitle">RollGeon</h1>
+          <p>The dungeon of fate chooses your path.</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button id="resetButton" class="ghost-button" type="button">
+          Reset
+        </button>
+
+        <button id="exportButton" class="ghost-button" type="button">
+          Export
+        </button>
+      </div>
+    </header>
+
+    <!-- MAIN -->
+    <main class="main-layout">
+      <!-- WHEEL AREA -->
+      <section class="wheel-section" aria-labelledby="wheelTitle">
+        <div class="section-label">
+          <span>Guild Wheel</span>
+          <strong id="itemsCount">0 items</strong>
+        </div>
+
+        <div class="wheel-stage">
+          <div class="wheel-frame">
+            <canvas
+              id="wheelCanvas"
+              class="wheel-canvas"
+              width="500"
+              height="500"
+              aria-label="Decision wheel"
+            ></canvas>
+
+            <div class="wheel-pointer" aria-hidden="true">
+              <span></span>
+            </div>
+
+            <div class="wheel-center" aria-hidden="true">
+              <span>R</span>
+            </div>
+          </div>
+
+          <div class="spin-aura" aria-hidden="true"></div>
+        </div>
+
+        <div class="spin-controls">
+          <button id="spinButton" class="spin-button" type="button">
+            <span class="spin-button-text">SPIN</span>
+            <span class="spin-button-icon">⚡</span>
+          </button>
+
+          <div id="currentResult" class="current-result">
+            <span class="result-kicker">Current Verdict</span>
+            <strong>No spins yet</strong>
+          </div>
+        </div>
+
+        <div id="suspenseMessage" class="suspense-message" aria-live="polite">
+          Add options and summon fate.
+        </div>
+      </section>
+
+      <!-- CONTROL PANEL -->
+      <aside class="control-panel">
+        <!-- ADD ITEM -->
+        <section class="panel-card">
+          <div class="panel-header">
+            <div>
+              <span class="eyebrow">Forge</span>
+              <h2>Add Option</h2>
+            </div>
+          </div>
+
+          <form id="itemForm" class="item-form">
+            <div class="form-row compact">
+              <label for="emojiInput">
+                Emoji
+                <input
+                  id="emojiInput"
+                  name="emoji"
+                  type="text"
+                  maxlength="4"
+                  placeholder="🍕"
+                  autocomplete="off"
+                />
+              </label>
+
+              <label for="colorInput">
+                Color
+                <input
+                  id="colorInput"
+                  name="color"
+                  type="color"
+                  value="#a855f7"
+                />
+              </label>
+            </div>
+
+            <label for="labelInput">
+              Option name
+              <input
+                id="labelInput"
+                name="label"
+                type="text"
+                placeholder="Ex: Pizza, Movie, Gym..."
+                autocomplete="off"
+                required
+              />
+            </label>
+
+            <label for="weightInput">
+              Weight
+              <input
+                id="weightInput"
+                name="weight"
+                type="number"
+                min="1"
+                max="99"
+                value="1"
+              />
+            </label>
+
+            <button class="primary-button" type="submit">
+              Add to wheel
+            </button>
+          </form>
+        </section>
+
+        <!-- ITEMS LIST -->
+        <section class="panel-card">
+          <div class="panel-header">
+            <div>
+              <span class="eyebrow">Inventory</span>
+              <h2>Wheel Items</h2>
+            </div>
+
+            <button id="clearItemsButton" class="small-button" type="button">
+              Clear
+            </button>
+          </div>
+
+          <div id="itemsList" class="items-list">
+            <div class="empty-state">
+              <strong>Nothing here yet.</strong>
+              <span>Add options to build your wheel.</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- SETTINGS -->
+        <section class="panel-card">
+          <div class="panel-header">
+            <div>
+              <span class="eyebrow">Tavern</span>
+              <h2>Game Mode</h2>
+            </div>
+          </div>
+
+          <div class="settings-grid">
+            <label class="toggle-card">
+              <input id="soundToggle" type="checkbox" checked />
+              <span>
+                <strong>Sounds</strong>
+                <small>Effects while spinning</small>
+              </span>
+            </label>
+
+            <label class="toggle-card">
+              <input id="confettiToggle" type="checkbox" checked />
+              <span>
+                <strong>Confetti</strong>
+                <small>Burst on result</small>
+              </span>
+            </label>
+
+            <label class="toggle-card">
+              <input id="eliminateToggle" type="checkbox" />
+              <span>
+                <strong>Elimination</strong>
+                <small>Removes each winner</small>
+              </span>
+            </label>
+
+            <label class="toggle-card">
+              <input id="weightedToggle" type="checkbox" />
+              <span>
+                <strong>Weights</strong>
+                <small>Uses different odds</small>
+              </span>
+            </label>
+          </div>
+
+          <label class="select-label" for="themeSelect">
+            Visual theme
+            <select id="themeSelect">
+              <option value="castle">Castle</option>
+              <option value="tavern">Tavern</option>
+              <option value="forest">Forest</option>
+              <option value="dungeon">Dungeon</option>
+              <option value="parchment">Parchment</option>
+            </select>
+          </label>
+
+          <label class="range-label" for="durationRange">
+            Spin duration
+            <input
+              id="durationRange"
+              type="range"
+              min="2500"
+              max="9000"
+              step="500"
+              value="5000"
+            />
+            <span id="durationLabel">5s</span>
+          </label>
+        </section>
+
+        <!-- PRESETS -->
+        <section class="panel-card">
+          <div class="panel-header">
+            <div>
+              <span class="eyebrow">Quests</span>
+              <h2>Quick Presets</h2>
+            </div>
+          </div>
+
+          <div class="preset-grid">
+            <button class="preset-button" type="button" data-preset="food">
+              🍔 What to eat?
+            </button>
+
+            <button class="preset-button" type="button" data-preset="movies">
+              🎬 What to watch?
+            </button>
+
+            <button class="preset-button" type="button" data-preset="chores">
+              🧹 Chores
+            </button>
+
+            <button class="preset-button" type="button" data-preset="challenges">
+              🔥 Challenges
+            </button>
+          </div>
+        </section>
+      </aside>
+    </main>
+
+    <!-- HISTORY -->
+    <section class="history-section" aria-labelledby="historyTitle">
+      <div class="section-header">
+        <div>
+          <span class="eyebrow">Wheel Chronicles</span>
+          <h2 id="historyTitle">Recent History</h2>
+        </div>
+
+        <button id="clearHistoryButton" class="ghost-button" type="button">
+          Clear history
+        </button>
+      </div>
+
+      <div id="historyList" class="history-list">
+        <div class="empty-state horizontal">
+          <strong>No spins yet.</strong>
+          <span>When the wheel spins, results appear here.</span>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- WINNER MODAL -->
+  <div id="winnerModal" class="winner-modal hidden" role="dialog" aria-modal="true">
+    <div class="winner-backdrop"></div>
+
+    <div class="winner-card">
+      <button
+        id="closeWinnerModal"
+        class="modal-close-button"
+        type="button"
+        aria-label="Close result"
+      >
+        ×
+      </button>
+
+      <span class="winner-kicker">The council has spoken</span>
+
+      <div id="winnerEmoji" class="winner-emoji">🎉</div>
+
+      <h2 id="winnerLabel">Result</h2>
+
+      <p id="winnerMessage">
+        Fate has spoken. Now accept the quest.
+      </p>
+
+      <button id="spinAgainButton" class="primary-button" type="button">
+        Spin again
+      </button>
+    </div>
+  </div>
+
+  <!-- IMPORT MODAL -->
+  <div id="importModal" class="import-modal hidden" role="dialog" aria-modal="true">
+    <div class="winner-backdrop"></div>
+
+    <div class="import-card">
+      <button
+        id="closeImportModal"
+        class="modal-close-button"
+        type="button"
+        aria-label="Close import"
+      >
+        ×
+      </button>
+
+      <span class="eyebrow">Import</span>
+      <h2>Paste saved wheel</h2>
+
+      <textarea
+        id="importTextarea"
+        placeholder="Paste the exported JSON here..."
+      ></textarea>
+
+      <button id="confirmImportButton" class="primary-button" type="button">
+        Import wheel
+      </button>
+    </div>
+  </div>
+
+  <!-- FLOATING ACTIONS -->
+  <div class="floating-actions">
+    <button id="importButton" class="floating-button" type="button" title="Import">
+      📥
+    </button>
+
+    <button id="randomizeColorsButton" class="floating-button" type="button" title="Shuffle colors">
+      🎨
+    </button>
+  </div>
+
+  <!-- CONFETTI LAYER -->
+  <div id="confettiLayer" class="confetti-layer" aria-hidden="true"></div>
+
+  <!-- AUDIO -->
+  <audio id="spinSound" src="assets/sounds/spin.mp3" preload="auto"></audio>
+  <audio id="tickSound" src="assets/sounds/tick.mp3" preload="auto"></audio>
+  <audio id="winSound" src="assets/sounds/win.mp3" preload="auto"></audio>
+
+  <!-- TEMPLATES -->
+  <template id="itemTemplate">
+    <article class="item-card">
+      <div class="item-main">
+        <button class="item-toggle" type="button" aria-label="Enable or disable item">
+          <span class="item-status-dot"></span>
+        </button>
+
+        <div class="item-color"></div>
+
+        <div class="item-content">
+          <strong class="item-title"></strong>
+          <small class="item-meta"></small>
+        </div>
+      </div>
+
+      <div class="item-actions">
+        <button class="icon-button edit-item" type="button" title="Edit">
+          ✏️
+        </button>
+
+        <button class="icon-button remove-item" type="button" title="Remove">
+          🗑️
+        </button>
+      </div>
+    </article>
+  </template>
+
+  <template id="historyTemplate">
+    <article class="history-item">
+      <div>
+        <strong class="history-title"></strong>
+        <small class="history-time"></small>
+      </div>
+
+      <span class="history-badge"></span>
+    </article>
+  </template>
+
+  <script src="script.js"></script>
+</body>
+</html>
